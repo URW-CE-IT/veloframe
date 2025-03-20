@@ -11,7 +11,7 @@
  */
 
 define("PROJ_DIR", __DIR__);
-define("DEBUG", true);
+define("DEBUG", 2);
 
 spl_autoload_register(function($cn) {
     if(file_exists("classes/".$cn.".php"))

@@ -15,10 +15,10 @@ class IndexHandler extends DefaultPageController {
         $index_tpl = new Template("index");
         $index_tpl->includeTemplate("head", new Template("std_head"));
         $index_tpl->includeTemplate("js_deps", new Template("js_deps"));
-        $index_tpl->includeTemplate("navbar", new Template("navbar"));
+
+        $index_tpl->setComponent("cardrow", new TemplateComponent("three_card_row", "Card Row Argument 1", "Card Row Argument 2", "Card Row Argument 3"));
 
         $index_tpl->setVariable("page", "Index");
-        $index_tpl->setVariable("data", print_r($_SERVER, true));
         return $index_tpl->output();
     }
 
