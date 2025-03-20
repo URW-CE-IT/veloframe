@@ -23,7 +23,7 @@ class TemplateComponent {
         $this->html = "";
         $this->open($component_name);
         if(is_array($args[0])) {
-            $this->setVarArray($args[0]);
+            $this->setNamedVarArray($args[0]);
         }else if($args != NULL) {
             $this->setVarArray($args);
         }
@@ -56,6 +56,12 @@ class TemplateComponent {
      */
     public function setVariable($name, $value) {
         $this->vars[$name] = $value;
+    }
+
+    public function setNamedVarArray($args) {
+        foreach($args as $key => $arg) {
+            $this->setVariable($key,$arg);
+        }
     }
 
     /**

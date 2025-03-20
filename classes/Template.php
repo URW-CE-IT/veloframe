@@ -34,7 +34,7 @@ class Template {
     public function includeTemplate($name, $template) {
         $tstr = $template;
         if(gettype($template) !== "string") {
-            $tstr = $template->output();
+            $tstr = $template->output(FALSE);
         }
 
         $changes = 0;
@@ -51,7 +51,18 @@ class Template {
         $this->vars[$name] = $component->output();
     }
 
+
+        
+    /**
+     * Output / "Render" the template to HTML.
+     *
+     * @param  mixed $var_default   Which value to set unassigned variables to. When set to NULL, unassigned variables will be forwarded (e.g. when including other templates)
+     * @return void
+     */
     public function output($var_default = "") {
+
+        if (ALLOW_INLINE_COMPONENTS)
+            $this->html = $this->processInlineComponents($this->html);
 
         #Scan for included templates
         $matches = array();
@@ -69,13 +80,42 @@ class Template {
         foreach($matches[1] as $match) {
             if(isset($this->vars[$match])) {
                 $this->html = str_ireplace("{[$match]}", $this->vars[$match], $this->html);
-            } else {
+            } else if ($var_default != FALSE) {
                 $this->html = str_ireplace("{[$match]}", $var_default, $this->html);
                 if(DEBUG > 1) echo "[INFO] Variable $match not set, defaulting to '$var_default'.";
             }
         }
         
         return $this->html;
+    }
+
+    function processInlineComponents($html) {
+        $pattern = '/<_([a-zA-Z0-9_]+)(\s+[^>]*)?>'
+                 . '(?P<content>(?:[^<]+|<(?!\/?_[a-zA-Z0-9_]+)|(?R))*)'
+                 . '<\/_\1>/s';
+        while (preg_match($pattern, $html)) {
+            $html = preg_replace_callback($pattern, function ($matches) {
+                $tagName = $matches[1];
+                $attr_string = isset($matches[2]) ? $matches[2] : "";
+                $inner_html = isset($matches['content']) ? $matches['content'] : "";
+                $inner_html = $this->processInlineComponents($inner_html);
+                $attributes = array();
+                if (!empty($attr_string)) {
+                    preg_match_all('/(\w+)\s*=\s*(?:"([^"]*)"|\'([^\']*)\')/', $attr_string, $attr_matches, PREG_SET_ORDER);
+                    foreach ($attr_matches as $attr) {
+                        $attributes[$attr[1]] = (!empty($attr[2])) ? $attr[2] : $attr[3];
+                    }
+                }
+                if (strlen($inner_html) > 0) {
+                    $attributes["content"] = $inner_html;
+                }
+                $component = new TemplateComponent($tagName, $attributes);
+                $output = $component->output();
+
+                return $output;
+            }, $html);
+        }
+        return $html;
     }
 
 }

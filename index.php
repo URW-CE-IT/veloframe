@@ -12,6 +12,7 @@
 
 define("PROJ_DIR", __DIR__);
 define("DEBUG", 2);
+define("ALLOW_INLINE_COMPONENTS", TRUE); # Inline Component Processing could impact performance. To improve performance, you can disable it if its not needed.
 
 spl_autoload_register(function($cn) {
     if(file_exists("classes/".$cn.".php"))
