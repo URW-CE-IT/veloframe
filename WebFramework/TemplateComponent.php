@@ -31,10 +31,14 @@ class TemplateComponent {
     }
 
     public function open($component_name) {
-        if(!file_exists(PROJ_DIR . "/templates/components/" . $component_name . ".htm")) {
-            return false;
+        $files = new \RecursiveDirectoryIterator(PROJ_DIR . "/templates/components/");
+        foreach (new \RecursiveIteratorIterator($files) as $file) {
+            if(basename($file, ".htm") == $component_name) {
+                $this->html = file_get_contents($file);
+                return;
+            }
         }
-        $this->html = file_get_contents(PROJ_DIR . "/templates/components/" . $component_name . ".htm");
+        return false;
     }
     
     /**
@@ -87,16 +91,22 @@ class TemplateComponent {
     }
 
     public function output($var_default = ""):string {
+        $this->var_default = $var_default;
         $matches = array();
-        preg_match_all('{\[(\w*)\]}', $this->html, $matches);
-        foreach($matches[1] as $match) {
-            if(isset($this->vars[$match])) {
-                $this->html = str_ireplace("{[$match]}", $this->vars[$match], $this->html);
-            } else {
-                $this->html = str_ireplace("{[$match]}", $var_default, $this->html);
-                if(DEBUG > 1) echo "[INFO] Variable $match not set, defaulting to '$var_default'.";
+        $pattern = '/\{(?:([^{}]*)\|)?\[(\w+)\](?:\|([^{}]*))?\}/s';
+        $this->html = preg_replace_callback($pattern, function ($matches) {
+            $var_default = $this->var_default;
+            $varname = $matches[2];
+            $prefix = $matches[1];
+            $suffix = isset($matches[3]) ? $matches[3] : "";
+
+            if(!isset($this->vars[$varname])) {
+                if(DEBUG > 1) echo "[INFO] Variable $varname not set, defaulting to '$var_default'.";
+                return $var_default;
             }
-        }
+            return $prefix.$this->vars[$varname].$suffix;
+
+        }, $this->html);
 
         return $this->html;
     }
