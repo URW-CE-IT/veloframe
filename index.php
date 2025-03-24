@@ -22,7 +22,7 @@ define("ALLOW_INLINE_COMPONENTS", TRUE);    # Inline Component Processing could 
 
 $path = "index";
 if(php_sapi_name() == 'cli-server') {
-    $path = substr($_SERVER['REQUEST_URI'], 1);
+    $path = parse_url($path, PHP_URL_PATH);
     if(is_file(__DIR__."/".$path)) {
         if(preg_match('/.(js|css|png|jpe?g|gif|svg|ico|webp|woff2?|ttf|otf|eot|mp4|mp3|wav|avi|mov|pdf|zip|rar|md)$/', $path)) {
             echo file_get_contents(__DIR__."/".$path);
