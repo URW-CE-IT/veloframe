@@ -5,7 +5,7 @@
  * Provides (static) functions to easily sanitize GET and POST user input
  * 
  * @author Patrick Matthias Garske <patrick@garske.link>
- * @since v0.2
+ * @since 0.2
  */
 
 ## Input Sources
