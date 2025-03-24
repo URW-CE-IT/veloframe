@@ -13,9 +13,10 @@ namespace WebFramework;
 class Template {
 
     private string $html;
+    /** @var array<string,mixed> $vars */
     private array $vars;
 
-    public function __construct($template_name = null) {
+    public function __construct(string $template_name = null) {
         $this->html = "";
         $this->vars = array();
         if($template_name !== null) {
@@ -25,8 +26,14 @@ class Template {
             }
         }
     }
-
-    public function open($template_name) {
+    
+    /**
+     * Open a new Template. Will replace the previously opened Template. Returns false if load failed and true if successful.
+     *
+     * @param  string $template_name
+     * @return bool
+     */
+    public function open(string $template_name) {
         if(!file_exists(PROJ_DIR . "/templates/" . $template_name . ".htm")) {
             return false;
         }
@@ -34,10 +41,17 @@ class Template {
         return true;
     }
 
-    /*
-    TODO: Migrate Template Include Logic to output()
-    */
-    public function includeTemplate($name, $template) {
+    
+    /**
+     * Include a new sub-template into a subtemplate variable
+     *
+     * TODO: Migrate Template inclusion logic to output()
+     * 
+     * @param  string $name
+     * @param  mixed $template (Accepts either a string (name of a template) or a Template object)
+     * @return void
+     */
+    public function includeTemplate(string $name, mixed $template) {
         $tstr = $template;
         if(gettype($template) !== "string") {
             $tstr = $template->output(FALSE);
@@ -48,12 +62,26 @@ class Template {
         if(defined("DEBUG") && $changes == 0 && DEBUG > 0)
             echo "[WARN] Sub-Template $name could not be included as the template was not found.\n";
     }
-
-    public function setVariable($name, $value) {
+    
+    /**
+     * setVariable
+     *
+     * @param  string $name
+     * @param  mixed $value
+     * @return void
+     */
+    public function setVariable(string $name, mixed $value) {
         $this->vars[$name] = $value;
     }
-
-    public function setComponent($name, TemplateComponent $component) {
+    
+    /**
+     * setComponent
+     *
+     * @param  string $name
+     * @param  TemplateComponent $component
+     * @return void
+     */
+    public function setComponent(string $name, TemplateComponent $component) {
         $this->vars[$name] = $component->output();
     }
 
@@ -62,10 +90,10 @@ class Template {
     /**
      * Output / "Render" the template to HTML.
      *
-     * @param  mixed $var_default   Which value to set unassigned variables to. When set to NULL, unassigned variables will be forwarded (e.g. when including other templates)
+     * @param  string $var_default   Which value to set unassigned variables to. When set to NULL, unassigned variables will be forwarded (e.g. when including other templates)
      * @return mixed
      */
-    public function output($var_default = "") {
+    public function output(string $var_default = "") {
 
         if (ALLOW_INLINE_COMPONENTS)
             $this->html = $this->processInlineComponents($this->html);
@@ -86,7 +114,7 @@ class Template {
         foreach($matches[1] as $match) {
             if(isset($this->vars[$match])) {
                 $this->html = str_ireplace("{[$match]}", $this->vars[$match], $this->html);
-            } else if ($var_default != FALSE) {
+            } else if ($var_default != NULL) {
                 $this->html = str_ireplace("{[$match]}", $var_default, $this->html);
                 if(defined("DEBUG") && DEBUG > 1) echo "[INFO] Variable $match not set, defaulting to '$var_default'.";
             }
@@ -94,8 +122,14 @@ class Template {
         
         return $this->html;
     }
-
-    function processInlineComponents($html) {
+    
+    /**
+     * Internal Function to process inline components
+     *
+     * @param  string $html
+     * @return string
+     */
+    private function processInlineComponents(string $html) {
         $pattern = '/<_([a-zA-Z0-9_]+)(\s+[^>]*)?>'
                  . '(?P<content>(?:[^<]+|<(?!\/?_[a-zA-Z0-9_]+)|(?R))*)'
                  . '<\/_\1>/s';

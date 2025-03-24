@@ -39,7 +39,7 @@ class RoutingHandler {
             if(!isset($this->handlers["error"])) {
                 return "404";
             }
-            $this->handlers["error"]->handleGet(array("error" => 404));
+            $this->handlers["error"]->handleGet(array("error" => "404"));
         }
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

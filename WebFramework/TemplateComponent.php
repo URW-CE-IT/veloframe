@@ -17,10 +17,11 @@ class TemplateComponent {
 
     private string $html;
     private string $name;
+    /** @var array<string,mixed> $vars */
     private array $vars;
     private string $var_default;
 
-    public function __construct($component_name, ...$args) {
+    public function __construct(string $component_name,mixed ...$args) {
         $this->name = $component_name;
         $this->html = "";
         $this->open($component_name);
@@ -30,13 +31,19 @@ class TemplateComponent {
             $this->setVarArray($args);
         }
     }
-
-    public function open($component_name) {
+    
+    /**
+     * Open a new Component by name. Will return false if the component could not be opened and true if the component has been loaded.
+     *
+     * @param  string $component_name
+     * @return bool
+     */
+    public function open(string $component_name) {
         $files = new \RecursiveDirectoryIterator(PROJ_DIR . "/templates/components/");
         foreach (new \RecursiveIteratorIterator($files) as $file) {
             if(basename($file, ".htm") == $component_name) {
                 $this->html = file_get_contents($file);
-                return;
+                return true;
             }
         }
         return false;
@@ -45,10 +52,10 @@ class TemplateComponent {
     /**
      * Public Alias of setVarArray with variadic parameter
      *
-     * @param   mixed   $args  Array of values to assign to the variables in order
+     * @param   array<string>   $args  Array of values to assign to the variables in order
      * @return  void
      */
-    public function setVars(...$args) {
+    public function setVars(string ...$args) {
         $this->setVarArray($args);
     }
 
@@ -56,15 +63,22 @@ class TemplateComponent {
     /**
      * Set a variable value.
      *
-     * @param  mixed $name
+     * @param  string $name
      * @param  mixed $value
      * @return void
      */
-    public function setVariable($name, $value) {
+    public function setVariable(string $name, mixed $value) {
         $this->vars[$name] = $value;
     }
 
-    public function setNamedVarArray($args) {
+        
+    /**
+     * Merges the given key-value paired array with the internal var array.
+     *
+     * @param  array<string,mixed> $args
+     * @return void
+     */
+    public function setNamedVarArray(array $args) {
         foreach($args as $key => $arg) {
             $this->setVariable($key,$arg);
         }
@@ -73,10 +87,10 @@ class TemplateComponent {
     /**
      * Parses variable names based on occurance in the components and sets values based on argument array index positions.
      * 
-     * @param   Array $args   Array of values to assign to the variables in order
+     * @param   array<string,mixed> $args   Array of values to assign to the variables in order
      * @return  void
      */
-    private function setVarArray($args) {
+    private function setVarArray(array $args) {
         $matches = array();
         preg_match_all('{\[(\w*)\]}', $this->html, $matches);
 
@@ -90,8 +104,14 @@ class TemplateComponent {
             $c++;
         }
     }
-
-    public function output($var_default = ""):string {
+    
+    /**
+     * Render the Component to HTML
+     *
+     * @param  string $var_default
+     * @return string
+     */
+    public function output(string $var_default = ""):string {
         $this->var_default = $var_default;
         $matches = array();
         $pattern = '/\{(?:([^{}]*)\|)?\[(\w+)\](?:\|([^{}]*))?\}/s';
