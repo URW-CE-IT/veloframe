@@ -19,7 +19,10 @@ class Template {
         $this->html = "";
         $this->vars = array();
         if($template_name !== null) {
-            $this->open($template_name);
+            $ret = $this->open($template_name);
+            if(!$ret) {
+                throw new \Exception("Template could not be opened! Please check if the file exists and permissions are ok.");
+            }
         }
     }
 
@@ -28,6 +31,7 @@ class Template {
             return false;
         }
         $this->html = file_get_contents(PROJ_DIR . "/templates/" . $template_name . ".htm");
+        return true;
     }
 
     /*

@@ -14,7 +14,11 @@ use WebFramework as WF;
 class IndexHandler extends WF\DefaultPageController {
 
     public function handleGet($params): string {
-        $index_tpl = new WF\Template("index");
+        try{
+            $index_tpl = new WF\Template("index");
+        } catch (Exception $e) {
+            return "ERROR! File could not be loaded.";
+        }
         $index_tpl->includeTemplate("head", new WF\Template("std_head"));
         $index_tpl->includeTemplate("js_deps", new WF\Template("js_deps"));
 
