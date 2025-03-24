@@ -15,11 +15,9 @@ define("DEBUG", 1); #0: No Debug; 1: WARNings only; 2: WARNings and INFOrmationa
 define("ALLOW_INLINE_COMPONENTS", TRUE); # Inline Component Processing could impact performance. To improve performance, you can disable it if its not needed.
 
 spl_autoload_register(function($cn) {
+    echo $cn;
     if(file_exists("classes/".$cn.".php"))
         require_once("classes/".$cn.".php");
-
-    if(file_exists("functions/".$cn.".php"))
-        require_once("functions/".$cn.".php");
 
     if(file_exists("pages/".$cn.".php"))
         require_once("pages/".$cn.".php");
