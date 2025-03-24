@@ -103,9 +103,9 @@ class Template {
                 $inner_html = $this->processInlineComponents($inner_html);
                 $attributes = array();
                 if (!empty($attr_string)) {
-                    preg_match_all('/(\w+)\s*=\s*(?:"([^"]*)"|\'([^\']*)\')/', $attr_string, $attr_matches, PREG_SET_ORDER);
+                    preg_match_all('/(\w+)(?:\s*=\s*(?:"([^"]*)"|\'([^\']*)\'))?/', $attr_string, $attr_matches, PREG_SET_ORDER);
                     foreach ($attr_matches as $attr) {
-                        $attributes[$attr[1]] = (!empty($attr[2])) ? $attr[2] : $attr[3];
+                        $attributes[$attr[1]] = isset($attr[2]) && $attr[2] !== '' ? $attr[2] : (isset($attr[3]) && $attr[3] !== '' ? $attr[3] : '');
                     }
                 }
                 if (strlen($inner_html) > 0) {
