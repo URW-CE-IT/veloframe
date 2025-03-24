@@ -8,6 +8,8 @@
  * @since 0.2
  */
 
+namespace WebFramework;
+
 ## Input Sources
 define ("INPUT_SRC_GET", 0);
 define ("INPUT_SRC_POST", 1);

@@ -9,17 +9,23 @@
  * @since 0.1
  */
 
-include_once("autoload.php");
+include_once("WebFramework/autoload.php");
+foreach(glob('pages/*.php') as $file) {     # Include all PageHandlers in pages directory
+    include_once $file;
+}
 
-define("DEBUG", 1); #0: No Debug; 1: WARNings only; 2: WARNings and INFOrmational messages
-define("ALLOW_INLINE_COMPONENTS", TRUE); # Inline Component Processing could impact performance. To improve performance, you can disable it if its not needed.
+use WebFramework as WF;
+
+define("PROJ_DIR", __DIR__);                # Set Project Directory to allow Template Engine to find required resources
+define("DEBUG", 1);                         # 0: No Debug; 1: WARNings only; 2: WARNings and INFOrmational messages
+define("ALLOW_INLINE_COMPONENTS", TRUE);    # Inline Component Processing could impact performance. To improve performance, you can disable it if its not needed.
 
 $path = "index";
 if(isset($_GET["rpath"])){
     $path = $_GET["rpath"];
 }
 
-$rh = new RoutingHandler();
+$rh = new WF\RoutingHandler();
 
 $rh->register("index", new IndexHandler());
 

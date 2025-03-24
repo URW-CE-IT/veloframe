@@ -8,6 +8,8 @@
  * @since 0.1
  */
 
+namespace WebFramework;
+
 class DefaultPageController implements RequestHandler {
 
     public function handleGet($params): string {

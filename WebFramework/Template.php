@@ -8,6 +8,8 @@
  * @since 0.1
  */
 
+namespace WebFramework;
+
 class Template {
 
     private string $html;
