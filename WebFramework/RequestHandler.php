@@ -1,5 +1,4 @@
 <?php
-
 /**
  * RequestHandler.php
  * 
@@ -9,6 +8,8 @@
  * @author Patrick Matthias Garske <patrick@garske.link>
  * @since 0.1
  */
+
+namespace WebFramework;
 
 interface RequestHandler
 {

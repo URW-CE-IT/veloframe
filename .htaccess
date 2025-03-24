@@ -1,5 +1,6 @@
 RewriteEngine On
-RewriteBase /carsv2/
+# Please change the RewriteBase to the Base Directory of your public domain path to WebFramework (e.G. example.org/webframework/ -> RewriteBase /webframework/)
+RewriteBase /
 
 # Exclude requests for img, css, and js directories
 RewriteRule ^(img|css|js)/(.*)$ - [L]
