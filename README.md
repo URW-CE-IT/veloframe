@@ -38,7 +38,7 @@ To quickly start a new project:
 3. **Start the Development Server:**
    If you're using PHP's built-in server (note: it does NOT support `.htaccess`):
    ```bash
-   php -S localhost:8000
+   php -S localhost:8000 index.php
    ```
 
    For full support including URL rewriting, use Apache or another web server supporting `.htaccess`.
