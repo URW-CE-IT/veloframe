@@ -59,7 +59,7 @@ class Template {
      * Output / "Render" the template to HTML.
      *
      * @param  mixed $var_default   Which value to set unassigned variables to. When set to NULL, unassigned variables will be forwarded (e.g. when including other templates)
-     * @return void
+     * @return mixed
      */
     public function output($var_default = "") {
 
