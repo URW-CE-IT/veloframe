@@ -13,7 +13,7 @@ use WebFramework as WF;
 
 class IndexHandler extends WF\DefaultPageController {
 
-    public function handleGet($params): string {
+    public function handleGet(array $params): string {
         try{
             $index_tpl = new WF\Template("index");
         } catch (Exception $e) {
