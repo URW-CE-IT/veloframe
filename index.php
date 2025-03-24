@@ -28,7 +28,7 @@ if(php_sapi_name() == 'cli-server') {
             echo file_get_contents(__DIR__."/".$path);
         }
     }
-    if(empty($path)) $path = "index";
+    if(strlen($path) == 0) $path = "index";
 }
 
 if(isset($_GET["rpath"])){
