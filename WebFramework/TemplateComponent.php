@@ -18,6 +18,7 @@ class TemplateComponent {
     private string $html;
     private string $name;
     private array $vars;
+    private string $var_default;
 
     public function __construct($component_name, ...$args) {
         $this->name = $component_name;
@@ -48,7 +49,7 @@ class TemplateComponent {
      * @return  void
      */
     public function setVars(...$args) {
-        setVarArray($args);
+        $this->setVarArray($args);
     }
 
         
