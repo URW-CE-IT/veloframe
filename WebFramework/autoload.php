@@ -6,7 +6,6 @@ spl_autoload_register(function($cn) {
     $cna = explode("\\", $cn);
     $cn = $cna[sizeof($cna) - 1];
     if(file_exists(__DIR__."/".$cn.".php")) {
-        echo $cn;
         require_once(__DIR__."/".$cn.".php");
     }
         
