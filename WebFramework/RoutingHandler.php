@@ -16,7 +16,7 @@ class RoutingHandler {
 
     public function register($uri, RequestHandler $handler) {
         if(isset($this->handlers[$uri]))
-            throw new Exception("Handler already registered for this URI.");
+            throw new \Exception("Handler already registered for this URI.");
         $this->handlers[$uri] = $handler;
     }
 
