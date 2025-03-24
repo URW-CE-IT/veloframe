@@ -1,5 +1,4 @@
 <?php
-
 /**
  * index.php
  * 
@@ -10,18 +9,10 @@
  * @since 0.1
  */
 
-define("PROJ_DIR", __DIR__);
+include_once("autoload.php");
+
 define("DEBUG", 1); #0: No Debug; 1: WARNings only; 2: WARNings and INFOrmational messages
 define("ALLOW_INLINE_COMPONENTS", TRUE); # Inline Component Processing could impact performance. To improve performance, you can disable it if its not needed.
-
-spl_autoload_register(function($cn) {
-    echo $cn;
-    if(file_exists("classes/".$cn.".php"))
-        require_once("classes/".$cn.".php");
-
-    if(file_exists("pages/".$cn.".php"))
-        require_once("pages/".$cn.".php");
-});
 
 $path = "index";
 if(isset($_GET["rpath"])){
