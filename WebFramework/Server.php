@@ -14,6 +14,7 @@ class Server {
 
     private string $proj_dir;
     private RoutingHandler $rh;
+    private bool $discovery_ran = false;
 
     public function __construct(string $proj_dir = NULL) {
         if(is_null($proj_dir)) {
@@ -23,14 +24,12 @@ class Server {
     }
     
     /**
-     * Attach a RoutingHandler to manage Pages - Will automatically search for pages in Project Root if AUTO_FIND_PAGES is TRUE.
+     * Automatically discover and register new Page Controllers
      *
      * @param  RoutingHandler $rh
      * @return void
      */
-    public function attachRoutingHandler(RoutingHandler $rh) {
-        $this->rh = $rh;
-
+    public function discoverPages() {
         if(defined("AUTO_FIND_PAGES") && AUTO_FIND_PAGES) {
             if(!is_dir($this->proj_dir . "/pages")) {
                 print_debug("AUTO_FIND_PAGES failed, as no 'pages' directory could be found in project root. Please try setting the project root manually and check your project structure.", 1);
@@ -82,6 +81,29 @@ class Server {
                     }
                 }
             }
+        }
+    }
+    
+    /**
+     * Get the Routing Handler attached to the Server. Will return NULL if no RoutingHandler has been attached yet.
+     *
+     * @return RoutingHandler
+     */
+    public function getRoutingHandler(): RoutingHandler {
+        return $this->rh;
+    }
+    
+    /**
+     * Attach a new RoutingHandler to the Server. Will run discoverPages if it hasnt run before.
+     *
+     * @param  RoutingHandler $rh
+     * @return void
+     */
+    public function setRoutingHandler(RoutingHandler $rh) {
+        $this->rh = $rh;
+        if(!$discovery_ran) {
+            $discovery_ran = true;
+            $this->discoverPages();
         }
     }
     
