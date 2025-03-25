@@ -39,7 +39,7 @@ class TemplateComponent {
      * @return bool
      */
     public function open(string $component_name) {
-        $files = new \RecursiveDirectoryIterator(PROJ_DIR . "/templates/components/");
+        $files = new \RecursiveDirectoryIterator($GLOBALS["WF_PROJ_DIR"] . "/templates/components/");
         foreach (new \RecursiveIteratorIterator($files) as $file) {
             if(basename($file, ".htm") == $component_name) {
                 $this->html = file_get_contents($file);

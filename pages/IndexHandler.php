@@ -11,6 +11,7 @@
 
 use WebFramework as WF;
 
+# @route index
 class IndexHandler extends WF\DefaultPageController {
 
     public function handleGet(array $params): string {

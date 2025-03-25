@@ -34,10 +34,10 @@ class Template {
      * @return bool
      */
     public function open(string $template_name) {
-        if(!file_exists(PROJ_DIR . "/templates/" . $template_name . ".htm")) {
+        if(!file_exists($GLOBALS["WF_PROJ_DIR"] . "/templates/" . $template_name . ".htm")) {
             return false;
         }
-        $this->html = file_get_contents(PROJ_DIR . "/templates/" . $template_name . ".htm");
+        $this->html = file_get_contents($GLOBALS["WF_PROJ_DIR"] . "/templates/" . $template_name . ".htm");
         return true;
     }
 
