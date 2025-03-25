@@ -111,7 +111,7 @@ class Template {
         foreach($matches[1] as $match) {
             if(isset($this->vars[$match])) {
                 $this->html = str_ireplace("{[$match]}", $this->vars[$match], $this->html);
-            } else if ($var_default != NULL) {
+            } else if (!is_null($var_default)) {
                 $this->html = str_ireplace("{[$match]}", $var_default, $this->html);
                 print_debug("Variable $match not set, defaulting to '$var_default'.", 2);
             }
