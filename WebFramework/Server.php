@@ -1,4 +1,13 @@
 <?php
+/**
+ * Server.php
+ * 
+ * Handles routing, serves registered routes and optionally auto-discoveres handlers
+ * 
+ * @author Patrick Matthias Garske <patrick@garske.link>
+ * @since 0.1
+ */
+
 namespace WebFramework;
 
 class Server {
