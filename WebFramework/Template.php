@@ -54,7 +54,7 @@ class Template {
     public function includeTemplate(string $name, mixed $template) {
         $tstr = $template;
         if(gettype($template) !== "string") {
-            $tstr = $template->output(FALSE);
+            $tstr = $template->output(NULL);
         }
 
         $changes = 0;
@@ -89,10 +89,10 @@ class Template {
     /**
      * Output / "Render" the template to HTML.
      *
-     * @param  string $var_default   Which value to set unassigned variables to. When set to NULL, unassigned variables will be forwarded (e.g. when including other templates)
+     * @param  string|null $var_default   Which value to set unassigned variables to. When set to NULL, unassigned variables will be forwarded (e.g. when including other templates)
      * @return mixed
      */
-    public function output(string $var_default = "") {
+    public function output(string|null $var_default = "") {
 
         if (ALLOW_INLINE_COMPONENTS)
             $this->html = $this->processInlineComponents($this->html);
