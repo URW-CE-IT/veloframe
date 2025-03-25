@@ -101,8 +101,8 @@ class Server {
      */
     public function setRoutingHandler(RoutingHandler $rh) {
         $this->rh = $rh;
-        if(!$discovery_ran) {
-            $discovery_ran = true;
+        if(!$this->discovery_ran) {
+            $this->discovery_ran = true;
             $this->discoverPages();
         }
     }
@@ -116,20 +116,19 @@ class Server {
         $path = "index";
 
         if(php_sapi_name() == 'cli-server') {
-            $path = parse_url($path, PHP_URL_PATH);
+            $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
             if(is_file($this->proj_dir."/".$path)) {
                 if(preg_match('/.(js|css|png|jpe?g|gif|svg|ico|webp|woff2?|ttf|otf|eot|mp4|mp3|wav|avi|mov|pdf|zip|rar|md)$/', $path)) {
                     echo file_get_contents($this->proj_dir."/".$path);
                     return;
                 }
-            }   
+            }
             if(strlen($path) == 0) $path = "index";
         }
 
         if(isset($_GET["rpath"])){
             $path = $_GET["rpath"];
         }
-        
         echo $this->rh->handle($path);
     }
 
