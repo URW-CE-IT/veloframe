@@ -6,13 +6,19 @@ class Server {
     private string $proj_dir;
     private RoutingHandler $rh;
 
-    public function __construct($proj_dir = NULL) {
+    public function __construct(string $proj_dir = NULL) {
         if(is_null($proj_dir)) {
             $this->proj_dir = pathinfo($_SERVER['SCRIPT_FILENAME'], PATHINFO_DIRNAME);
         }
         $GLOBALS["WF_PROJ_DIR"] = $this->proj_dir;
     }
-
+    
+    /**
+     * Attach a RoutingHandler to manage Pages - Will automatically search for pages in Project Root if AUTO_FIND_PAGES is TRUE.
+     *
+     * @param  RoutingHandler $rh
+     * @return void
+     */
     public function attachRoutingHandler(RoutingHandler $rh) {
         $this->rh = $rh;
 
@@ -66,15 +72,15 @@ class Server {
                         }
                     }
                 }
-
             }
-
-
         }
-
-
     }
-
+    
+    /**
+     * Serve the Request
+     *
+     * @return void
+     */
     public function serve() {
         $path = "index";
 
