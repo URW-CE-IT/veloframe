@@ -59,8 +59,7 @@ class Template {
 
         $changes = 0;
         $this->html = str_ireplace("{![$name]}", $tstr, $this->html, $changes);
-        if(defined("DEBUG") && $changes == 0 && DEBUG > 0)
-            echo "[WARN] Sub-Template $name could not be included as the template was not found.\n";
+        if($changes == 0) print_debug("Sub-Template $name could not be included as the template was not found.\n", 1);
     }
     
     /**
@@ -103,9 +102,7 @@ class Template {
         preg_match_all('{!\[(\w*)\]}', $this->html, $matches);
         foreach($matches[1] as $match) {
             $this->html = str_ireplace("{![$match]}", "", $this->html);
-            if(defined("DEBUG") && DEBUG > 0) {
-                echo "[WARN] Template include $match is required but not fulfilled!";
-            }
+            print_debug("Template include $match is required but not fulfilled!", 1);
         }
 
         #Scan for variables
@@ -116,7 +113,7 @@ class Template {
                 $this->html = str_ireplace("{[$match]}", $this->vars[$match], $this->html);
             } else if ($var_default != NULL) {
                 $this->html = str_ireplace("{[$match]}", $var_default, $this->html);
-                if(defined("DEBUG") && DEBUG > 1) echo "[INFO] Variable $match not set, defaulting to '$var_default'.";
+                print_debug("Variable $match not set, defaulting to '$var_default'.", 2);
             }
         }
         

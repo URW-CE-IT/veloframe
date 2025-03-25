@@ -95,7 +95,7 @@ class TemplateComponent {
         preg_match_all('{\[(\w*)\]}', $this->html, $matches);
 
         if(defined("DEBUG") && DEBUG > 2 && sizeof($matches[1]) != sizeof($args)) {
-            echo "[INFO] Number of Arguments given and required by ".$this->name." are not equal.";
+            print_debug("Number of Arguments given and required by ".$this->name." are not equal.", 2);
         }
 
         $c = 0;
@@ -122,7 +122,7 @@ class TemplateComponent {
             $suffix = isset($matches[3]) ? $matches[3] : "";
 
             if(!isset($this->vars[$varname])) {
-                if(defined("DEBUG") && DEBUG > 1) echo "[INFO] Variable $varname not set, defaulting to '$var_default'.";
+                print_debug("Variable $varname not set, defaulting to '$var_default'.", 2);
                 return $var_default;
             }
             return $prefix.$this->vars[$varname].$suffix;
