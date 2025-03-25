@@ -14,5 +14,5 @@ include_once("WebFramework/autoload.php");
 use WebFramework as WF;
 
 $server = new WF\Server();
-$server->attachRoutingHandler(new WF\RoutingHandler());
+$server->setRoutingHandler(new WF\RoutingHandler());
 $server->serve();
