@@ -12,7 +12,20 @@
 namespace WebFramework;
 
 interface RequestHandler
-{
-    public function handleGet($params): string;
-    public function handlePost($params): string;
+{    
+    /**
+     * Handle a GET Request and return the rendered HTML as a string
+     *
+     * @param  array<string> $params
+     * @return string
+     */
+    public function handleGet(array $params): string;
+
+    /**
+     * Handle a GET Request and return the rendered HTML as a string
+     *
+     * @param  array<string> $params
+     * @return string
+     */
+    public function handlePost(array $params): string;
 }

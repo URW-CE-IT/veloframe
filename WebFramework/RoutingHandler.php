@@ -12,21 +12,34 @@ namespace WebFramework;
 
 class RoutingHandler {
 
+    /** @var array<RequestHandler> $handlers */
     private array $handlers;
-
-    public function register($uri, RequestHandler $handler) {
+    
+    /**
+     * Register a new RequestHandler with a specific URI
+     *
+     * @param  string $uri
+     * @param  RequestHandler $handler
+     * @return void
+     */
+    public function register(string $uri, RequestHandler $handler) {
         if(isset($this->handlers[$uri]))
-            throw new Exception("Handler already registered for this URI.");
+            throw new \Exception("Handler already registered for this URI.");
         $this->handlers[$uri] = $handler;
     }
-
-    public function handle($uri) {
-
+    
+    /**
+     * Automatically select the correct previously registered RequestHandler to process a request for a given URI and return the rendered HTML string
+     *
+     * @param  string $uri
+     * @return string
+     */
+    public function handle(string $uri) {
         if(!isset($this->handlers[$uri])) {
             if(!isset($this->handlers["error"])) {
                 return "404";
             }
-            $this->handlers["error"]->handleGet(array("error" => 404));
+            $this->handlers["error"]->handleGet(array("error" => "404"));
         }
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

@@ -13,27 +13,45 @@ namespace WebFramework;
 class Template {
 
     private string $html;
+    /** @var array<string,mixed> $vars */
     private array $vars;
 
-    public function __construct($template_name = null) {
+    public function __construct(string $template_name = null) {
         $this->html = "";
         $this->vars = array();
         if($template_name !== null) {
-            $this->open($template_name);
+            $ret = $this->open($template_name);
+            if(!$ret) {
+                throw new \Exception("Template could not be opened! Please check if the file exists and permissions are ok.");
+            }
         }
     }
-
-    public function open($template_name) {
-        if(!file_exists(PROJ_DIR . "/templates/" . $template_name . ".htm")) {
+    
+    /**
+     * Open a new Template. Will replace the previously opened Template. Returns false if load failed and true if successful.
+     *
+     * @param  string $template_name
+     * @return bool
+     */
+    public function open(string $template_name) {
+        if(!file_exists($GLOBALS["WF_PROJ_DIR"] . "/templates/" . $template_name . ".htm")) {
             return false;
         }
-        $this->html = file_get_contents(PROJ_DIR . "/templates/" . $template_name . ".htm");
+        $this->html = file_get_contents($GLOBALS["WF_PROJ_DIR"] . "/templates/" . $template_name . ".htm");
+        return true;
     }
 
-    /*
-    TODO: Migrate Template Include Logic to output()
-    */
-    public function includeTemplate($name, $template) {
+    
+    /**
+     * Include a new sub-template into a subtemplate variable
+     *
+     * TODO: Migrate Template inclusion logic to output()
+     * 
+     * @param  string $name
+     * @param  mixed $template (Accepts either a string (name of a template) or a Template object)
+     * @return void
+     */
+    public function includeTemplate(string $name, mixed $template) {
         $tstr = $template;
         if(gettype($template) !== "string") {
             $tstr = $template->output(FALSE);
@@ -41,15 +59,28 @@ class Template {
 
         $changes = 0;
         $this->html = str_ireplace("{![$name]}", $tstr, $this->html, $changes);
-        if($changes == 0 && DEBUG > 0)
-            echo "[WARN] Sub-Template $name could not be included as the template was not found.\n";
+        if($changes == 0) print_debug("Sub-Template $name could not be included as the template was not found.\n", 1);
     }
-
-    public function setVariable($name, $value) {
+    
+    /**
+     * setVariable
+     *
+     * @param  string $name
+     * @param  mixed $value
+     * @return void
+     */
+    public function setVariable(string $name, mixed $value) {
         $this->vars[$name] = $value;
     }
-
-    public function setComponent($name, TemplateComponent $component) {
+    
+    /**
+     * setComponent
+     *
+     * @param  string $name
+     * @param  TemplateComponent $component
+     * @return void
+     */
+    public function setComponent(string $name, TemplateComponent $component) {
         $this->vars[$name] = $component->output();
     }
 
@@ -58,10 +89,10 @@ class Template {
     /**
      * Output / "Render" the template to HTML.
      *
-     * @param  mixed $var_default   Which value to set unassigned variables to. When set to NULL, unassigned variables will be forwarded (e.g. when including other templates)
-     * @return void
+     * @param  string $var_default   Which value to set unassigned variables to. When set to NULL, unassigned variables will be forwarded (e.g. when including other templates)
+     * @return mixed
      */
-    public function output($var_default = "") {
+    public function output(string $var_default = "") {
 
         if (ALLOW_INLINE_COMPONENTS)
             $this->html = $this->processInlineComponents($this->html);
@@ -71,9 +102,7 @@ class Template {
         preg_match_all('{!\[(\w*)\]}', $this->html, $matches);
         foreach($matches[1] as $match) {
             $this->html = str_ireplace("{![$match]}", "", $this->html);
-            if(DEBUG > 0) {
-                echo "[WARN] Template include $match is required but not fulfilled!";
-            }
+            print_debug("Template include $match is required but not fulfilled!", 1);
         }
 
         #Scan for variables
@@ -82,16 +111,22 @@ class Template {
         foreach($matches[1] as $match) {
             if(isset($this->vars[$match])) {
                 $this->html = str_ireplace("{[$match]}", $this->vars[$match], $this->html);
-            } else if ($var_default != FALSE) {
+            } else if ($var_default != NULL) {
                 $this->html = str_ireplace("{[$match]}", $var_default, $this->html);
-                if(DEBUG > 1) echo "[INFO] Variable $match not set, defaulting to '$var_default'.";
+                print_debug("Variable $match not set, defaulting to '$var_default'.", 2);
             }
         }
         
         return $this->html;
     }
-
-    function processInlineComponents($html) {
+    
+    /**
+     * Internal Function to process inline components
+     *
+     * @param  string $html
+     * @return string
+     */
+    private function processInlineComponents(string $html) {
         $pattern = '/<_([a-zA-Z0-9_]+)(\s+[^>]*)?>'
                  . '(?P<content>(?:[^<]+|<(?!\/?_[a-zA-Z0-9_]+)|(?R))*)'
                  . '<\/_\1>/s';
@@ -103,9 +138,9 @@ class Template {
                 $inner_html = $this->processInlineComponents($inner_html);
                 $attributes = array();
                 if (!empty($attr_string)) {
-                    preg_match_all('/(\w+)\s*=\s*(?:"([^"]*)"|\'([^\']*)\')/', $attr_string, $attr_matches, PREG_SET_ORDER);
+                    preg_match_all('/(\w+)(?:\s*=\s*(?:"([^"]*)"|\'([^\']*)\'))?/', $attr_string, $attr_matches, PREG_SET_ORDER);
                     foreach ($attr_matches as $attr) {
-                        $attributes[$attr[1]] = (!empty($attr[2])) ? $attr[2] : $attr[3];
+                        $attributes[$attr[1]] = isset($attr[2]) && $attr[2] !== '' ? $attr[2] : (isset($attr[3]) && $attr[3] !== '' ? $attr[3] : '');
                     }
                 }
                 if (strlen($inner_html) > 0) {

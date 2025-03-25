@@ -12,7 +12,7 @@ namespace WebFramework;
 
 class Session {
 
-    function __construct($autostart = TRUE){
+    function __construct(bool $autostart = TRUE){
         if ($autostart) session_start();
     }
     
