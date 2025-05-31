@@ -40,16 +40,42 @@ class RoutingHandler {
             if(!isset($this->handlers["error"])) {
                 return "404";
             }
-            return $this->handlers["error"]->handleGet(array("error" => "404"));
+            return $this->handlers["error"]->handleGet([
+                "error" => 404,
+                "message" => "Not Found",
+                "exception" => new HTTPException("Not Found", 404, true, true)
+            ]);
         }
 
-
-        //TODO: Surround with try-catch-block and catch new HTTPException to allow throwing custom error codes within Request Handlers
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            return $this->handlers[$uri]->handlePost($_POST);
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                return $this->handlers[$uri]->handlePost($_POST);
+            }
+            return $this->handlers[$uri]->handleGet($_GET);
+        } catch (HTTPException $e) {
+            http_response_code($e->getStatusCode());
+            if ($e->shouldUseErrorHook() && isset($this->handlers["error"])) {
+                // Pass the exception to the error handler, include message and code
+                $errorData = [
+                    "error" => $e->getStatusCode(),
+                    "message" => $e->getMessage(),
+                    "exception" => $e
+                ];
+                $result = $this->handlers["error"]->handleGet($errorData);
+                if ($e->isTerminal()) {
+                    return $result;
+                }
+                // If not terminal, continue processing (could append or log, here just return result for now)
+                return $result;
+            } else {
+                // No error hook or not using it, just return the message
+                if ($e->isTerminal()) {
+                    return $e->getMessage();
+                }
+                // If not terminal, continue processing (could append or log, here just return message for now)
+                return $e->getMessage();
+            }
         }
-        return $this->handlers[$uri]->handleGet($_GET);
-
     }
 
 }
