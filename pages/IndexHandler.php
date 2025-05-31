@@ -14,7 +14,7 @@ use VeloFrame as WF;
 # @route index
 class IndexHandler extends WF\DefaultPageController {
 
-    public function handleGet(array $params): string {
+    public function handleGet(array $params) {
         try{
             $index_tpl = new WF\Template("index");
         } catch (Exception $e) {
@@ -30,7 +30,12 @@ class IndexHandler extends WF\DefaultPageController {
         $index_tpl->setVariable("get_test2", $test2_val);
 
         $index_tpl->setVariable("page", "Index");
-        return new HTTPResponse($index_tpl->output());
+        return new WF\HTTPResponse($index_tpl->output(),200, [
+            "Content-Type" => "text/html; charset=utf-8",
+            "Cache-Control" => "no-cache, no-store, must-revalidate",
+            "Pragma" => "no-cache",
+            "Expires" => "0"
+        ]);
     }
 
 }
