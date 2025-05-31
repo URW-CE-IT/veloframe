@@ -8,7 +8,7 @@
  * @since 0.1
  */
 
-namespace WebFramework;
+namespace VeloFrame;
 
 class Server {
 
@@ -18,7 +18,7 @@ class Server {
 
     public function __construct(string $proj_dir = NULL) {
         if(is_null($proj_dir)) {
-            $this->proj_dir = pathinfo($_SERVER['SCRIPT_FILENAME'], PATHINFO_DIRNAME);
+            $this->proj_dir = pathinfo(__DIR__, PATHINFO_DIRNAME);
         }
         $GLOBALS["WF_PROJ_DIR"] = $this->proj_dir;
     }
@@ -33,8 +33,10 @@ class Server {
         if(defined("AUTO_FIND_PAGES") && AUTO_FIND_PAGES) {
             if(!is_dir($this->proj_dir . "/pages")) {
                 print_debug("AUTO_FIND_PAGES failed, as no 'pages' directory could be found in project root. Please try setting the project root manually and check your project structure.", 1);
+                
                 return;
             }
+
 
             $pages_dir = new \RecursiveDirectoryIterator($this->proj_dir . "/pages");
             $filter = new \RecursiveCallbackFilterIterator($pages_dir, function($current, $key, $iterator) {
@@ -115,20 +117,34 @@ class Server {
     public function serve() {
         $path = "index";
 
+        if(defined("SERVICE_ATTRIB") && SERVICE_ATTRIB)
+            header('X-Powered-By: URW-CE-IT/VeloFrame');
+
         if(php_sapi_name() == 'cli-server') {
             $path = parse_url(substr($_SERVER['REQUEST_URI'], 1), PHP_URL_PATH);
-            if(is_file($this->proj_dir."/".$path)) {
-                if(preg_match('/.(js|css|png|jpe?g|gif|svg|ico|webp|woff2?|ttf|otf|eot|mp4|mp3|wav|avi|mov|pdf|zip|rar|md)$/', $path)) {
-                    echo file_get_contents($this->proj_dir."/".$path);
-                    return;
-                }
-            }
             if(strlen($path) == 0) $path = "index";
         }
+
         if(isset($_GET["rpath"])){
             $path = $_GET["rpath"];
-        }
+        } 
         
+        // Check if an image is requested and serve using Optimizer
+        if(preg_match('/.(png|jpe?g|gif|svg|ico|webp)$/', $path)) {
+            echo Optimizer::serveOptimizedImage($this->proj_dir."/".$path);
+            return;
+        }
+        // Check if a JS file is requested and serve it using Optimizer
+        if(preg_match('/.(js)$/', $path)) {
+            echo Optimizer::serveOptimizedJS($this->proj_dir."/".$path);
+            return;
+        }
+        // Check if a CSS file is requested and serve it using Optimizer
+        if(preg_match('/.(css)$/', $path)) {
+            echo Optimizer::serveOptimizedCSS($this->proj_dir."/".$path);
+            return;
+        }
+
         echo $this->rh->handle($path);
     }
 

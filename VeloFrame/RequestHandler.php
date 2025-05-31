@@ -9,7 +9,7 @@
  * @since 0.1
  */
 
-namespace WebFramework;
+namespace VeloFrame;
 
 interface RequestHandler
 {    
