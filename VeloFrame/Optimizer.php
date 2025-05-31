@@ -20,7 +20,10 @@ class Optimizer {
      */
     public static function serveOptimizedImage(string $filepath): string{
         // Check if Cache Directory is enabled and file exists
-        if (defined("CACHE_DIR") && is_dir(CACHE_DIR)) {
+        if (defined("CACHE_DIR")) {
+            if (!is_dir(CACHE_DIR)) {
+                mkdir(CACHE_DIR, 0751, true); // Create cache directory if it doesn't exist
+            }
             $cacheFile = CACHE_DIR . '/' . md5($filepath) . '.webp';
             if (file_exists($cacheFile)) {
                 header('Content-Type: image/webp');
@@ -54,6 +57,9 @@ class Optimizer {
      * @return bool Returns true if the image was successfully optimized and saved, false otherwise.
      */
     public static function optimizeImage(string $filepath, int $max_res = AUTO_OPTIMIZE_IMAGES_MAX_RESOLUTION): bool {
+        if (!extension_loaded('gd')) {
+            return false; // GD library not available
+        }
         if (!file_exists($filepath)) {
             return false; // File does not exist
         }

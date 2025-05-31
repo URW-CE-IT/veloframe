@@ -18,7 +18,7 @@ class Server {
 
     public function __construct(string $proj_dir = NULL) {
         if(is_null($proj_dir)) {
-            $this->proj_dir = pathinfo($_SERVER['SCRIPT_FILENAME'], PATHINFO_DIRNAME);
+            $this->proj_dir = pathinfo(__DIR__, PATHINFO_DIRNAME);
         }
         $GLOBALS["WF_PROJ_DIR"] = $this->proj_dir;
     }
@@ -33,8 +33,10 @@ class Server {
         if(defined("AUTO_FIND_PAGES") && AUTO_FIND_PAGES) {
             if(!is_dir($this->proj_dir . "/pages")) {
                 print_debug("AUTO_FIND_PAGES failed, as no 'pages' directory could be found in project root. Please try setting the project root manually and check your project structure.", 1);
+                
                 return;
             }
+
 
             $pages_dir = new \RecursiveDirectoryIterator($this->proj_dir . "/pages");
             $filter = new \RecursiveCallbackFilterIterator($pages_dir, function($current, $key, $iterator) {
@@ -125,10 +127,8 @@ class Server {
 
         if(isset($_GET["rpath"])){
             $path = $_GET["rpath"];
-        }
-
-        echo $path;
-
+        } 
+        
         // Check if an image is requested and serve using Optimizer
         if(preg_match('/.(png|jpe?g|gif|svg|ico|webp)$/', $path)) {
             echo Optimizer::serveOptimizedImage($this->proj_dir."/".$path);

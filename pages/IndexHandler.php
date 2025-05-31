@@ -12,7 +12,7 @@
 use VeloFrame as WF;
 
 # @route index
-class IndexHandler extends WF\VeloFrame {
+class IndexHandler extends WF\DefaultPageController {
 
     public function handleGet(array $params): string {
         try{

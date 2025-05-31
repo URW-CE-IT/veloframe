@@ -35,7 +35,7 @@ class RoutingHandler {
      * @return string
      */
     public function handle(string $uri) {
-        
+
         if(!isset($this->handlers[$uri])) {
             if(!isset($this->handlers["error"])) {
                 return "404";
