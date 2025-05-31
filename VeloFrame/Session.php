@@ -8,7 +8,7 @@
  * @since 0.2
  */
 
-namespace WebFramework;
+namespace VeloFrame;
 
 class Session {
 

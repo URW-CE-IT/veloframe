@@ -9,10 +9,10 @@
  * @since 0.1
  */
 
-use WebFramework as WF;
+use VeloFrame as WF;
 
 # @route index
-class IndexHandler extends WF\DefaultPageController {
+class IndexHandler extends WF\VeloFrame {
 
     public function handleGet(array $params): string {
         try{

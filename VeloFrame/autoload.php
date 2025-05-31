@@ -7,7 +7,7 @@
  * @author Patrick Matthias Garske <patrick@garske.link>
  * @since 0.2
  */
-namespace WebFramework;
+namespace VeloFrame;
 
 include_once ("config.php");
 

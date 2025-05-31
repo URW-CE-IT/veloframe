@@ -8,7 +8,7 @@
  * @since 0.1
  */
 
-namespace WebFramework;
+namespace VeloFrame;
 
 class Template {
 
