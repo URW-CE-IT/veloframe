@@ -23,8 +23,6 @@ class IndexHandler extends WF\DefaultPageController {
         $index_tpl->includeTemplate("head", new WF\Template("std_head"));
         $index_tpl->includeTemplate("js_deps", new WF\Template("js_deps"));
 
-        throw new WF\HTTPException("This is a test exception.", 500);
-
         $test1_val = WF\Input::sanitize("test1", INPUT_TYPE_STRING, "Please set the GET Parameter test1 to see the value here.");
         $index_tpl->setVariable("get_test1", $test1_val);
 
@@ -32,7 +30,7 @@ class IndexHandler extends WF\DefaultPageController {
         $index_tpl->setVariable("get_test2", $test2_val);
 
         $index_tpl->setVariable("page", "Index");
-        return $index_tpl->output();
+        return new HTTPResponse($index_tpl->output());
     }
 
 }

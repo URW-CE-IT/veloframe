@@ -14,18 +14,18 @@ namespace VeloFrame;
 interface RequestHandler
 {    
     /**
-     * Handle a GET Request and return the rendered HTML as a string
+     * Handle a GET Request and return the rendered HTML as a string or HTTPResponse
      *
      * @param  array<string> $params
-     * @return string
+     * @return string|HTTPResponse
      */
-    public function handleGet(array $params): string;
+    public function handleGet(array $params);
 
     /**
-     * Handle a GET Request and return the rendered HTML as a string
+     * Handle a POST Request and return the rendered HTML as a string or HTTPResponse
      *
      * @param  array<string> $params
-     * @return string
+     * @return string|HTTPResponse
      */
-    public function handlePost(array $params): string;
+    public function handlePost(array $params);
 }
