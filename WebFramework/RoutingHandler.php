@@ -35,6 +35,9 @@ class RoutingHandler {
      * @return string
      */
     public function handle(string $uri) {
+        if(defined("SERVICE_ATTRIB") && SERVICE_ATTRIB)
+            header('X-Powered-By: URW-CE-IT/WebFramework');
+        
         if(!isset($this->handlers[$uri])) {
             if(!isset($this->handlers["error"])) {
                 return "404";
