@@ -12,7 +12,7 @@ namespace VeloFrame;
 include_once ("config.php");
 
 spl_autoload_register(function($cn) {
-    if(!str_starts_with($cn, "WebFramework\\")) 
+    if(!str_starts_with($cn, "VeloFrame\\")) 
         return;
     $cna = explode("\\", $cn);
     $cn = $cna[sizeof($cna) - 1];

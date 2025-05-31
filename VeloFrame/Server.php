@@ -115,20 +115,36 @@ class Server {
     public function serve() {
         $path = "index";
 
+        if(defined("SERVICE_ATTRIB") && SERVICE_ATTRIB)
+            header('X-Powered-By: URW-CE-IT/VeloFrame');
+
         if(php_sapi_name() == 'cli-server') {
             $path = parse_url(substr($_SERVER['REQUEST_URI'], 1), PHP_URL_PATH);
-            if(is_file($this->proj_dir."/".$path)) {
-                if(preg_match('/.(js|css|png|jpe?g|gif|svg|ico|webp|woff2?|ttf|otf|eot|mp4|mp3|wav|avi|mov|pdf|zip|rar|md)$/', $path)) {
-                    echo file_get_contents($this->proj_dir."/".$path);
-                    return;
-                }
-            }
             if(strlen($path) == 0) $path = "index";
         }
+
         if(isset($_GET["rpath"])){
             $path = $_GET["rpath"];
         }
-        
+
+        echo $path;
+
+        // Check if an image is requested and serve using Optimizer
+        if(preg_match('/.(png|jpe?g|gif|svg|ico|webp)$/', $path)) {
+            echo Optimizer::serveOptimizedImage($this->proj_dir."/".$path);
+            return;
+        }
+        // Check if a JS file is requested and serve it using Optimizer
+        if(preg_match('/.(js)$/', $path)) {
+            echo Optimizer::serveOptimizedJS($this->proj_dir."/".$path);
+            return;
+        }
+        // Check if a CSS file is requested and serve it using Optimizer
+        if(preg_match('/.(css)$/', $path)) {
+            echo Optimizer::serveOptimizedCSS($this->proj_dir."/".$path);
+            return;
+        }
+
         echo $this->rh->handle($path);
     }
 
