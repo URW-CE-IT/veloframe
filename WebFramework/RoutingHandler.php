@@ -39,9 +39,11 @@ class RoutingHandler {
             if(!isset($this->handlers["error"])) {
                 return "404";
             }
-            $this->handlers["error"]->handleGet(array("error" => "404"));
+            return $this->handlers["error"]->handleGet(array("error" => "404"));
         }
-        
+
+
+        //TODO: Surround with try-catch-block and catch new HTTPException to allow throwing custom error codes within Request Handlers
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             return $this->handlers[$uri]->handlePost($_POST);
         }
