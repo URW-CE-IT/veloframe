@@ -327,7 +327,7 @@ class Template {
                 case 'component':
                     $attr = [];
                     if (!empty($token['attr'])) {
-                        preg_match_all('/(\w+)\s*=\s*(["\'][^"\']*["\']|[^\s"\']+)/', $token['attr'], $matches, PREG_SET_ORDER);
+                        preg_match_all('/(\w+)(?:\s*=\s*[\"\']?([^\"\']*)[\"\']?)?/', $token['attr'], $matches, PREG_SET_ORDER);
                         foreach ($matches as $m) {
                             $attr[$m[1]] = trim($m[2], '"\'');
                         }
