@@ -68,7 +68,7 @@ class Server {
                     if(substr($line, 0, 5) == "class") {
                         #Found class declaration - check if extends DefaultPageController or implements RequestHandler and require + register URIs
                         $matches = array();
-                        $pattern = '/class\s+(\w+)\s+(?:(?:extends\s+(?:[A-Za-z_]\w*\\\\)*DefaultPageController)|(?:implements\s+(?:[A-Za-z_]\w*\\\\)*RequestHandler))\s*\{/';
+                        $pattern = '/class\s+(\w+)\s+(?:(?:extends\s+(?:[A-Za-z_]\w*\\\\)*DefaultPageController)|(?:implements\s+(?:[A-Za-z_]\w*\\\\)*RequestHandler))\s*/';
                         if(preg_match($pattern, $line, $matches)){
                             require_once($file);
                             $class_name = $matches[1];
