@@ -103,7 +103,10 @@ class Template {
      * @return mixed
      */
     public function output(string|null $var_default = "") {
-
+        if (is_null($var_default)) {
+            return $this->html;
+        }
+        
         if (ALLOW_INLINE_COMPONENTS)
             $this->html = $this->processInlineComponents($this->html);
 
