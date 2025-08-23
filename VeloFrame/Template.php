@@ -250,9 +250,12 @@ class Template {
                 $loop_html = $this->processConditionals($loop_html);
                 
                 // Process variable substitution
-                foreach ($this->vars as $varname => $varvalue) {
-                    if (is_scalar($varvalue)) {
-                        $loop_html = str_replace("{[$varname]}", (string)$varvalue, $loop_html);
+                // Find all variable placeholders in the loop content
+                preg_match_all('/{\[([^\]]+)\]}/', $loop_html, $matches_vars);
+                $used_vars = array_unique($matches_vars[1]);
+                foreach ($used_vars as $varname) {
+                    if (isset($this->vars[$varname]) && is_scalar($this->vars[$varname])) {
+                        $loop_html = str_replace("{[$varname]}", (string)$this->vars[$varname], $loop_html);
                     }
                 }
                 
