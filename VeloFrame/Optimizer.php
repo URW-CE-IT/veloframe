@@ -18,15 +18,14 @@ class Optimizer {
      * @param  string $filepath Path to the image file to be optimized.
      * @return string Returns the optimized image content or the original image content if optimization fails or is not enabled.
      */
-        public static function serveOptimizedImage(string $filepath): string {
+    public static function serveOptimizedImage(string $filepath): string{
+        // Check if Cache Directory is enabled and file exists
         if (defined("CACHE_DIR")) {
             if (!is_dir(CACHE_DIR)) {
-                mkdir(CACHE_DIR, 0751, true);
+                mkdir(CACHE_DIR, 0751, true); // Create cache directory if it doesn't exist
             }
             $cacheFile = CACHE_DIR . '/' . md5($filepath) . '.webp';
-            $cacheValid = file_exists($cacheFile) && filemtime($cacheFile) >= filemtime($filepath);
-
-            if ($cacheValid) {
+            if (file_exists($cacheFile)) {
                 header('Content-Type: image/webp');
                 return file_get_contents($cacheFile);
             }
@@ -36,10 +35,12 @@ class Optimizer {
                     header('Content-Type: image/webp');
                     return file_get_contents($cacheFile);
                 } else {
+                    // If optimization fails, return the original file
                     header('Content-Type: image/' . pathinfo($filepath, PATHINFO_EXTENSION));
                     return file_get_contents($filepath);
                 }
             } else {
+                // If auto-optimization is not enabled, return the original file
                 header('Content-Type: image/' . pathinfo($filepath, PATHINFO_EXTENSION));
                 return file_get_contents($filepath);
             }
@@ -122,8 +123,7 @@ class Optimizer {
     public static function serveOptimizedCSS(string $filepath): string {
         if (defined("CACHE_DIR") && is_dir(CACHE_DIR)) {
             $cacheFile = CACHE_DIR . '/' . md5($filepath) . '.min.css';
-            $cacheValid = file_exists($cacheFile) && filemtime($cacheFile) >= filemtime($filepath);
-            if ($cacheValid) {
+            if (file_exists($cacheFile)) {
                 header('Content-Type: text/css');
                 return file_get_contents($cacheFile);
             }
@@ -175,8 +175,7 @@ class Optimizer {
     public static function serveOptimizedJS(string $filepath): string {
         if (defined("CACHE_DIR") && is_dir(CACHE_DIR)) {
             $cacheFile = CACHE_DIR . '/' . md5($filepath) . '.min.js';
-            $cacheValid = file_exists($cacheFile) && filemtime($cacheFile) >= filemtime($filepath);
-            if ($cacheValid) {
+            if (file_exists($cacheFile)) {
                 header('Content-Type: application/javascript');
                 return file_get_contents($cacheFile);
             }
