@@ -13,22 +13,22 @@ namespace VeloFrame;
 class DefaultPageController implements RequestHandler {
     
     /**
-     * Handle a GET Request and return the rendered HTML as a string
+     * Handle a GET Request and return the rendered HTML as a string or HTTPResponse
      *
      * @param  array<string> $params
-     * @return string
+     * @return string|HTTPResponse
      */
-    public function handleGet(array $params): string {
+    public function handleGet(array $params) {
         return "Unhandled";
     }
 
     /**
-     * Handle a POST Request and return the rendered HTML as a string
+     * Handle a POST Request and return the rendered HTML as a string or HTTPResponse
      *
      * @param  array<string> $params
-     * @return string
+     * @return string|HTTPResponse
      */
-    public function handlePost(array $params): string {
+    public function handlePost(array $params) {
         return "Unhandled";
     }
 

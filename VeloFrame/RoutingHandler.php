@@ -35,21 +35,65 @@ class RoutingHandler {
      * @return string
      */
     public function handle(string $uri) {
-
         if(!isset($this->handlers[$uri])) {
             if(!isset($this->handlers["error"])) {
+                http_response_code(404);
                 return "404";
             }
-            return $this->handlers["error"]->handleGet(array("error" => "404"));
+            $errorResponse = $this->handlers["error"]->handleGet([
+                "error" => 404,
+                "message" => "Not Found",
+                "exception" => new HTTPException("Not Found", 404, true)
+            ]);
+            if ($errorResponse instanceof HTTPResponse) {
+                http_response_code($errorResponse->statusCode);
+                foreach ($errorResponse->headers as $k => $v) {
+                    header("$k: $v");
+                }
+                return $errorResponse->content;
+            }
+            http_response_code(404);
+            return $errorResponse;
         }
 
-
-        //TODO: Surround with try-catch-block and catch new HTTPException to allow throwing custom error codes within Request Handlers
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            return $this->handlers[$uri]->handlePost($_POST);
+        try {
+            $handler = $this->handlers[$uri];
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $response = $handler->handlePost($_POST);
+            } else {
+                $response = $handler->handleGet($_GET);
+            }
+            if ($response instanceof HTTPResponse) {
+                http_response_code($response->statusCode);
+                foreach ($response->headers as $k => $v) {
+                    header("$k: $v");
+                }
+                return $response->content;
+            }
+            // If string, treat as 200 OK
+            http_response_code(200);
+            return $response;
+        } catch (HTTPException $e) {
+            http_response_code($e->getStatusCode());
+            if ($e->shouldUseErrorHook() && isset($this->handlers["error"])) {
+                $errorData = [
+                    "error" => $e->getStatusCode(),
+                    "message" => $e->getMessage(),
+                    "exception" => $e
+                ];
+                $result = $this->handlers["error"]->handleGet($errorData);
+                if ($result instanceof HTTPResponse) {
+                    http_response_code($result->statusCode);
+                    foreach ($result->headers as $k => $v) {
+                        header("$k: $v");
+                    }
+                    return $result->content;
+                }
+                return $result;
+            } else {
+                return $e->getMessage();
+            }
         }
-        return $this->handlers[$uri]->handleGet($_GET);
-
     }
 
 }

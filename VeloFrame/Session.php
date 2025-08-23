@@ -13,7 +13,11 @@ namespace VeloFrame;
 class Session {
 
     function __construct(bool $autostart = TRUE){
-        if ($autostart) session_start();
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            if ($autostart) {
+                session_start();
+            }
+        }
     }
     
     /**

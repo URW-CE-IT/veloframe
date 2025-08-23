@@ -9,3 +9,4 @@ define("AUTO_OPTIMIZE_JS", TRUE);           # Automatically optimize CSS and JS 
 define("AUTO_OPTIMIZE_IMAGES", TRUE);       # Automatically optimize images by removing metadata and compressing them
 define("AUTO_OPTIMIZE_IMAGES_MAX_RESOLUTION", 1080); # Automatically optimize HTML files by removing comments and whitespace
 define("CACHE_DIR", __DIR__ . "/cache/"); # Directory to store optimized files in. Make sure this directory is writable by the webserver user.
+define("MAX_DEPTH", 100);                   # Maximum depth of nested statements in Templates. This is to prevent infinite loops in case of faulty templates.
