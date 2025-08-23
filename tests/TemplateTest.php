@@ -79,25 +79,26 @@ class TemplateTest {
         // Temporarily override WF_PROJ_DIR to use our test directory
         $original_proj_dir = $GLOBALS["WF_PROJ_DIR"];
         $GLOBALS["WF_PROJ_DIR"] = __DIR__ . "/test_templates";
-        
-        $this->createTestTemplate("basic_vars", "Hello {[name]}! You are {[age]} years old.");
-        
-        $template = new Template("basic_vars");
-        $template->setVariable("name", "John");
-        $template->setVariable("age", "25");
-        
-        $output = $template->output();
-        $this->assertEquals("Hello John! You are 25 years old.", $output, "Basic variable substitution");
-        
-        // Test unset variables with default
-        $template2 = new Template("basic_vars");
-        $template2->setVariable("name", "Jane");
-        
-        $output2 = $template2->output("DEFAULT");
-        $this->assertEquals("Hello Jane! You are DEFAULT years old.", $output2, "Unset variable with default");
-        
-        // Restore original WF_PROJ_DIR
-        $GLOBALS["WF_PROJ_DIR"] = $original_proj_dir;
+        try {
+            $this->createTestTemplate("basic_vars", "Hello {[name]}! You are {[age]} years old.");
+            
+            $template = new Template("basic_vars");
+            $template->setVariable("name", "John");
+            $template->setVariable("age", "25");
+            
+            $output = $template->output();
+            $this->assertEquals("Hello John! You are 25 years old.", $output, "Basic variable substitution");
+            
+            // Test unset variables with default
+            $template2 = new Template("basic_vars");
+            $template2->setVariable("name", "Jane");
+            
+            $output2 = $template2->output("DEFAULT");
+            $this->assertEquals("Hello Jane! You are DEFAULT years old.", $output2, "Unset variable with default");
+        } finally {
+            // Restore original WF_PROJ_DIR
+            $GLOBALS["WF_PROJ_DIR"] = $original_proj_dir;
+        }
     }
     
     /**
