@@ -74,6 +74,16 @@ class Template {
     }
     
     /**
+     * setHTML - Set HTML content directly (for testing purposes)
+     *
+     * @param  string $html
+     * @return void
+     */
+    public function setHTML(string $html) {
+        $this->html = $html;
+    }
+    
+    /**
      * setComponent
      *
      * @param  string $name
@@ -93,9 +103,18 @@ class Template {
      * @return mixed
      */
     public function output(string|null $var_default = "") {
-
+        if (is_null($var_default)) {
+            return $this->html;
+        }
+        
         if (ALLOW_INLINE_COMPONENTS)
             $this->html = $this->processInlineComponents($this->html);
+
+        // Process loops first (they handle their own conditionals internally)
+        $this->html = $this->processLoops($this->html);
+        
+        // Process any remaining conditionals after loops
+        $this->html = $this->processConditionals($this->html);
 
         #Scan for included templates
         $matches = array();
@@ -105,9 +124,9 @@ class Template {
             print_debug("Template include $match is required but not fulfilled!", 1);
         }
 
-        #Scan for variables
+        #Scan for variables (including dotted variables like user.name)
         $matches = array();
-        preg_match_all('{\[(\w*)\]}', $this->html, $matches);
+        preg_match_all('{\[([a-zA-Z0-9_.]+)\]}', $this->html, $matches);
         foreach($matches[1] as $match) {
             if(isset($this->vars[$match])) {
                 $this->html = str_ireplace("{[$match]}", $this->vars[$match], $this->html);
@@ -152,6 +171,103 @@ class Template {
                 return $output;
             }, $html);
         }
+        return $html;
+    }
+
+    /**
+     * Internal Function to process conditionals
+     *
+     * @param  string $html
+     * @return string
+     */
+    private function processConditionals(string $html) {
+        // Process conditionals from innermost to outermost
+        while (preg_match('/\{\%if\s+([a-zA-Z0-9_.]+)\%\}/', $html)) {
+            // Find innermost conditional (no nested conditionals inside)
+            $pattern = '/\{\%if\s+([a-zA-Z0-9_.]+)\%\}((?:(?!\{\%if\s+[a-zA-Z0-9_.]+\%\}).)*?)(?:\{\%else\%\}((?:(?!\{\%if\s+[a-zA-Z0-9_.]+\%\}).)*?))?\{\%endif\%\}/s';
+            
+            $html = preg_replace_callback($pattern, function ($matches) {
+                $variable = $matches[1];
+                $if_content = $matches[2];
+                $else_content = isset($matches[3]) ? $matches[3] : '';
+                
+                // Check if variable is set and evaluates to true
+                if (isset($this->vars[$variable]) && $this->vars[$variable]) {
+                    return $if_content;
+                } else {
+                    return $else_content;
+                }
+            }, $html);
+        }
+        
+        return $html;
+    }
+
+    /**
+     * Internal Function to process loops
+     *
+     * @param  string $html
+     * @return string
+     */
+    private function processLoops(string $html) {
+        // Process for loops: {%for item in array%}content{%endfor%}
+        $pattern = '/\{\%for\s+([a-zA-Z0-9_]+)\s+in\s+([a-zA-Z0-9_]+)\%\}(.*?)\{\%endfor\%\}/s';
+        
+        $html = preg_replace_callback($pattern, function ($matches) {
+            $item_var = $matches[1];
+            $array_var = $matches[2];
+            $loop_content = $matches[3];
+            
+            // Check if array variable is set
+            if (!isset($this->vars[$array_var]) || !is_array($this->vars[$array_var])) {
+                return ''; // Return empty if array doesn't exist
+            }
+            
+            $output = '';
+            $array = $this->vars[$array_var];
+            
+            foreach ($array as $index => $item) {
+                $loop_html = $loop_content;
+                
+                // Store original variables to restore later
+                $original_vars = $this->vars;
+                
+                // Set loop item variables temporarily
+                if (is_scalar($item)) {
+                    $this->vars[$item_var] = (string)$item;
+                }
+                
+                // Handle object/array item variables
+                if (is_array($item)) {
+                    foreach ($item as $key => $value) {
+                        if (is_scalar($value)) {
+                            $this->vars["$item_var.$key"] = (string)$value;
+                        }
+                    }
+                }
+                
+                // Process conditionals in the loop content with current variables
+                $loop_html = $this->processConditionals($loop_html);
+                
+                // Process variable substitution
+                // Find all variable placeholders in the loop content
+                preg_match_all('/{\[([^\]]+)\]}/', $loop_html, $matches_vars);
+                $used_vars = array_unique($matches_vars[1]);
+                foreach ($used_vars as $varname) {
+                    if (isset($this->vars[$varname]) && is_scalar($this->vars[$varname])) {
+                        $loop_html = str_replace("{[$varname]}", (string)$this->vars[$varname], $loop_html);
+                    }
+                }
+                
+                // Restore original variables
+                $this->vars = $original_vars;
+                
+                $output .= $loop_html;
+            }
+            
+            return $output;
+        }, $html);
+        
         return $html;
     }
 
