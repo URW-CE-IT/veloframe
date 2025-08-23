@@ -113,8 +113,16 @@ class TemplateComponent {
      */
     public function output(string $var_default = ""):string {
         $this->var_default = $var_default;
+        
+        // Process conditionals first
+        $this->html = $this->processConditionals($this->html);
+        
+        // Process loops
+        $this->html = $this->processLoops($this->html);
+        
+        // Process variables with prefix/suffix support (including dotted variables)
         $matches = array();
-        $pattern = '/\{(?:([^{}]*)\|)?\[(\w+)\](?:\|([^{}]*))?\}/s';
+        $pattern = '/\{(?:([^{}]*)\|)?\[([a-zA-Z0-9_.]+)\](?:\|([^{}]*))?\}/s';
         $this->html = preg_replace_callback($pattern, function ($matches) {
             $var_default = $this->var_default;
             $varname = $matches[2];
@@ -130,6 +138,106 @@ class TemplateComponent {
         }, $this->html);
 
         return $this->html;
+    }
+
+    /**
+     * Internal Function to process conditionals
+     *
+     * @param  string $html
+     * @return string
+     */
+    private function processConditionals(string $html) {
+        // Process conditionals from innermost to outermost
+        while (preg_match('/\{\%if\s+([a-zA-Z0-9_.]+)\%\}/', $html)) {
+            // Find innermost conditional (no nested conditionals inside)
+            $pattern = '/\{\%if\s+([a-zA-Z0-9_.]+)\%\}((?:(?!\{\%if\s+[a-zA-Z0-9_.]+\%\}).)*?)(?:\{\%else\%\}((?:(?!\{\%if\s+[a-zA-Z0-9_.]+\%\}).)*?))?\{\%endif\%\}/s';
+            
+            $html = preg_replace_callback($pattern, function ($matches) {
+                $variable = $matches[1];
+                $if_content = $matches[2];
+                $else_content = isset($matches[3]) ? $matches[3] : '';
+                
+                // Check if variable is set and evaluates to true
+                if (isset($this->vars[$variable]) && $this->vars[$variable]) {
+                    return $if_content;
+                } else {
+                    return $else_content;
+                }
+            }, $html);
+        }
+        
+        return $html;
+    }
+
+    /**
+     * Internal Function to process loops
+     *
+     * @param  string $html
+     * @return string
+     */
+    private function processLoops(string $html) {
+        // Process for loops: {%for item in array%}content{%endfor%}
+        $pattern = '/\{\%for\s+([a-zA-Z0-9_]+)\s+in\s+([a-zA-Z0-9_]+)\%\}(.*?)\{\%endfor\%\}/s';
+        
+        $html = preg_replace_callback($pattern, function ($matches) {
+            $item_var = $matches[1];
+            $array_var = $matches[2];
+            $loop_content = $matches[3];
+            
+            // Check if array variable is set
+            if (!isset($this->vars[$array_var]) || !is_array($this->vars[$array_var])) {
+                return ''; // Return empty if array doesn't exist
+            }
+            
+            $output = '';
+            $array = $this->vars[$array_var];
+            
+            foreach ($array as $index => $item) {
+                $loop_html = $loop_content;
+                
+                // Store original variables to restore later
+                $original_vars = $this->vars;
+                
+                // Set loop item variables temporarily
+                if (is_scalar($item)) {
+                    $this->vars[$item_var] = (string)$item;
+                }
+                
+                // Handle object/array item variables
+                if (is_array($item)) {
+                    foreach ($item as $key => $value) {
+                        if (is_scalar($value)) {
+                            $this->vars["$item_var.$key"] = (string)$value;
+                        }
+                    }
+                }
+                
+                // Process conditionals in the loop content with current variables
+                $loop_html = $this->processConditionals($loop_html);
+                
+                // Process variable substitution (only prefix/suffix style for components)
+                $pattern = '/\{(?:([^{}]*)\|)?\[([a-zA-Z0-9_.]+)\](?:\|([^{}]*))?\}/s';
+                $loop_html = preg_replace_callback($pattern, function ($matches) {
+                    $varname = $matches[2];
+                    $prefix = $matches[1];
+                    $suffix = isset($matches[3]) ? $matches[3] : "";
+
+                    if(isset($this->vars[$varname])) {
+                        return $prefix.$this->vars[$varname].$suffix;
+                    }
+                    return $this->var_default;
+                }, $loop_html);
+                
+                // Restore original variables
+                $this->vars = $original_vars;
+                
+                $output .= $loop_html;
+            }
+            
+            return $output;
+        }, $html);
+        
+        return $html;
     }
 
 }
